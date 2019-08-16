@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
-    public class Owner
+    public class Lessee
     {
         public int Id { get; set; }
 
@@ -36,8 +36,6 @@
         public string FullName => $"{FirstName} {LastName}";
 
         public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
-
-        public ICollection<Property> Properties { get; set; }
 
         public ICollection<Contract> Contracts { get; set; }
 
