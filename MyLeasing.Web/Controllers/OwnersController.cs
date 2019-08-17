@@ -2,26 +2,31 @@
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using MyLeasing.Web.Data;
     using MyLeasing.Web.Data.Entities;
-   
 
+    [Authorize(Roles = "Manager")]
     public class OwnersController : Controller
     {
-        private readonly DataContext _context;
+        private readonly DataContext _dataContext;
 
         public OwnersController(DataContext context)
         {
-            _context = context;
+            _dataContext = context;
         }
 
         // GET: Owners
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Owners.ToListAsync());
+            return View(_dataContext.Owners
+                .Include(ow => ow.User)
+                .Include(ow => ow.Properties)
+                .Include(ow => ow.Contracts));
         }
+
 
         // GET: Owners/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -31,8 +36,15 @@
                 return NotFound();
             }
 
-            var owner = await _context.Owners
+            var owner = await _dataContext.Owners
+                .Include(ow => ow.User)
+                .Include(ow => ow.Properties)
+                .ThenInclude(pt => pt.PropertyType)
+                .Include(ow => ow.Properties)
+                .ThenInclude(pi => pi.PropertyImages)
+                .Include(ow => ow.Contracts)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (owner == null)
             {
                 return NotFound();
@@ -56,8 +68,8 @@
         {
             if (ModelState.IsValid)
             {
-                _context.Add(owner);
-                await _context.SaveChangesAsync();
+                _dataContext.Add(owner);
+                await _dataContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(owner);
@@ -71,7 +83,7 @@
                 return NotFound();
             }
 
-            var owner = await _context.Owners.FindAsync(id);
+            var owner = await _dataContext.Owners.FindAsync(id);
             if (owner == null)
             {
                 return NotFound();
@@ -95,8 +107,8 @@
             {
                 try
                 {
-                    _context.Update(owner);
-                    await _context.SaveChangesAsync();
+                    _dataContext.Update(owner);
+                    await _dataContext.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -122,7 +134,7 @@
                 return NotFound();
             }
 
-            var owner = await _context.Owners
+            var owner = await _dataContext.Owners
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (owner == null)
             {
@@ -137,15 +149,15 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var owner = await _context.Owners.FindAsync(id);
-            _context.Owners.Remove(owner);
-            await _context.SaveChangesAsync();
+            var owner = await _dataContext.Owners.FindAsync(id);
+            _dataContext.Owners.Remove(owner);
+            await _dataContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool OwnerExists(int id)
         {
-            return _context.Owners.Any(e => e.Id == id);
+            return _dataContext.Owners.Any(e => e.Id == id);
         }
     }
 }

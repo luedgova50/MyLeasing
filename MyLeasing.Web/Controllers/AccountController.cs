@@ -16,6 +16,7 @@
             _userHelper = userHelper;
         }
 
+        [HttpGet]
         public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
@@ -49,6 +50,7 @@
             return View(model);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await _userHelper.LogoutAsync();
