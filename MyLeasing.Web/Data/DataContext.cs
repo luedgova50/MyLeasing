@@ -1,9 +1,10 @@
 ﻿namespace MyLeasing.Web.Data
 {
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
     using MyLeasing.Web.Data.Entities;
 
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<User>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
@@ -21,6 +22,8 @@
         public DbSet<PropertyImage> PropertyImages { get; set; }
 
         public DbSet<PropertyType> PropertyTypes { get; set; }
+
+        public DbSet<Manager> Managers { get; set; }
 
 
     }
